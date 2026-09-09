@@ -55,6 +55,13 @@ android {
     }
     val hasUploadKey = keyProperties.getProperty("storeFile") != null
 
+    // Set by CI for the Play bundle only. A bundle that is going to be signed
+    // by hand must leave here with *no* signature at all: signing a
+    // debug-signed bundle again leaves both signatures in META-INF, and Play
+    // rejects that. The APKs are still debug-signed, because an unsigned APK
+    // cannot be installed and those are the ones people sideload.
+    val buildUnsigned = System.getenv("QAMUS_UNSIGNED") == "1"
+
     signingConfigs {
         if (hasUploadKey) {
             create("upload") {
@@ -68,10 +75,10 @@ android {
 
     buildTypes {
         release {
-            signingConfig = if (hasUploadKey) {
-                signingConfigs.getByName("upload")
-            } else {
-                signingConfigs.getByName("debug")
+            signingConfig = when {
+                hasUploadKey -> signingConfigs.getByName("upload")
+                buildUnsigned -> null
+                else -> signingConfigs.getByName("debug")
             }
 
             // The Dart half is already AOT machine code with its symbols

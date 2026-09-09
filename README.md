@@ -387,8 +387,8 @@ re-deflating an LZMA stream only makes it bigger.
 
 | Artifact | Contents |
 |---|---|
-| **`qamus-googleplay`** | the `.aab` Play wants, the R8 mapping and the Dart symbols it needs to read a crash report, and a README with the upload steps |
-| **`qamus-appstore`** | the `.xcarchive` Xcode Organizer distributes, `ExportOptions.plist` set to `app-store-connect`, the Dart symbols, and a README with both export routes |
+| **`qamus-googleplay`** | the **unsigned** `.aab`, `sign_for_play.sh` to sign it with your own key, the R8 mapping and the Dart symbols Play needs to read a crash report, and a README with every step |
+| **`qamus-appstore`** | the unsigned `.xcarchive` Xcode Organizer distributes, `ExportOptions.plist` set to `app-store-connect`, the Dart symbols, and a README with both export routes |
 | `qamus-arm64-apk` | **`app-arm64-v8a-release.apk.xz`** — on its own, since it is what almost every phone needs |
 | `qamus-android-other` | the armeabi-v7a and x86_64 APKs, and the AAB |
 | `qamus-windows-exe` | **`qamus-setup.exe.xz`** — one self-contained Windows installer, built with Inno Setup |
@@ -403,10 +403,22 @@ Neither store accepts what CI can produce on its own, and the reason is the
 same in both cases: signing needs a private key that must not live in a
 repository.
 
-**Google Play.** Add four repository secrets and the release build signs
-itself; without them the build still succeeds, the bundle is debug-signed, and
-the artifact's README says so in capitals rather than letting a rejected
-upload be the first you hear of it.
+**Google Play.** The bundle leaves CI **unsigned**, on purpose: signing a
+bundle that already carries the debug signature leaves both signatures in
+`META-INF`, and Play rejects that. `tools/sign_for_play.sh` ships inside the
+artifact and does the last step on the machine that has the keystore:
+
+```bash
+./sign_for_play.sh qamus-release.aab upload-keystore.jks upload
+```
+
+It reads both passwords with the echo off, signs in place with `jarsigner` —
+an `.aab` is not an APK, so `apksigner` is the wrong tool — and verifies the
+result without `-strict`, which would reject the self-signed certificate every
+upload key has.
+
+If you would rather CI signed it, add four repository secrets instead; the
+release build then signs itself and the artifact's README says so.
 
 | Secret | |
 |---|---|
@@ -444,6 +456,7 @@ docs/
   privacy-policy.md                            the same, in four languages
 tools/
   seal_corpus.py    xz  ->  the sealed asset that ships
+  sign_for_play.sh  signs the Play bundle with your own upload key
   lib/src/theme.dart
   assets/db/        qamus.corpus.xz            the packed corpus
   assets/fonts/     Vazirmatn                  subset to the Arabic ranges
