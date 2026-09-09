@@ -1333,6 +1333,70 @@ void main() {
     });
   });
 
+  group('the keyboard', () {
+    testWidgets('does not open until the search box is tapped', (tester) async {
+      await pumpApp(tester);
+
+      final field = tester.widget<TextField>(find.byType(TextField).first);
+      expect(
+        field.autofocus,
+        isFalse,
+        reason: 'nothing on the home page asks for the keyboard',
+      );
+      expect(
+        field.focusNode?.hasFocus,
+        isFalse,
+        reason: 'and nothing has taken focus on its behalf',
+      );
+
+      await tester.tap(find.byType(TextField).first);
+      await tester.pumpAndSettle();
+      expect(
+        field.focusNode?.hasFocus,
+        isTrue,
+        reason: 'a tap is what opens it',
+      );
+
+      // And the results list hands it back the moment the reader drags it,
+      // which is what reading a result means.
+      await tester.enterText(find.byType(TextField).first, 'كتب');
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pumpAndSettle();
+      final lists = tester.widgetList<ListView>(find.byType(ListView));
+      expect(
+        lists.any(
+          (l) =>
+              l.keyboardDismissBehavior ==
+              ScrollViewKeyboardDismissBehavior.onDrag,
+        ),
+        isTrue,
+        reason: 'the results list gives the keyboard back on a drag',
+      );
+    });
+
+    testWidgets('switching tabs and coming back does not open it', (
+      tester,
+    ) async {
+      await pumpApp(tester);
+      const strings = Strings(AppLocale.ar);
+
+      await tester.tap(find.byType(TextField).first);
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text(strings.navSettings));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text(strings.navHome));
+      await tester.pumpAndSettle();
+
+      final field = tester.widget<TextField>(find.byType(TextField).first);
+      expect(
+        field.focusNode?.hasFocus,
+        isFalse,
+        reason: 'leaving the tab should put the keyboard away',
+      );
+    });
+  });
+
   group('onboarding', () {
     testWidgets('a first launch asks for a language before anything else', (
       tester,

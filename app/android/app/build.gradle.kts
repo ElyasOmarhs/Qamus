@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     id("kotlin-android")
@@ -41,11 +43,36 @@ android {
         versionName = flutter.versionName
     }
 
+    // Google Play will not accept a debug-signed bundle. When an upload key
+    // is present — android/key.properties, which CI writes from repository
+    // secrets and which is never committed — the release build is signed with
+    // it. Without one the build still succeeds, signed with the debug key, so
+    // that `flutter run --release` and every CI run keep working; only the
+    // Play upload needs the real thing.
+    val keyProperties = Properties().apply {
+        val file = rootProject.file("key.properties")
+        if (file.exists()) file.inputStream().use { load(it) }
+    }
+    val hasUploadKey = keyProperties.getProperty("storeFile") != null
+
+    signingConfigs {
+        if (hasUploadKey) {
+            create("upload") {
+                storeFile = rootProject.file(keyProperties.getProperty("storeFile"))
+                storePassword = keyProperties.getProperty("storePassword")
+                keyAlias = keyProperties.getProperty("keyAlias")
+                keyPassword = keyProperties.getProperty("keyPassword")
+            }
+        }
+    }
+
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = if (hasUploadKey) {
+                signingConfigs.getByName("upload")
+            } else {
+                signingConfigs.getByName("debug")
+            }
 
             // The Dart half is already AOT machine code with its symbols
             // stripped by --obfuscate. R8 does the same for the thin Java and

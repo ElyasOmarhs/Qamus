@@ -72,6 +72,24 @@ jobs:
         working-directory: app
         run: flutter pub get
 
+      # Google Play rejects a debug-signed bundle. If the repository carries
+      # an upload key, the release build is signed with it; if not, the build
+      # still runs (debug-signed) and the Play artifact says so, so a fork
+      # without secrets is never broken by this step.
+      - name: restore the upload key
+        if: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+        env:
+          ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          echo "$ANDROID_KEYSTORE_BASE64" | base64 -d > app/android/app/upload-keystore.jks
+          cat > app/android/key.properties <<EOF
+          storeFile=app/upload-keystore.jks
+          storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}
+          keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}
+          EOF
+          echo "signed=true" >> "$GITHUB_ENV"
+
       # --split-per-abi keeps each APK to one architecture, which removes the
       # other two copies of the Flutter engine from every download.
       - name: build apks
@@ -98,6 +116,62 @@ jobs:
           name: qamus-arm64-apk
           path: app-arm64-v8a-release.apk.xz
           compression-level: 0        # the payload is already xz'd
+          if-no-files-found: error
+
+      # What actually gets uploaded to Google Play: the bundle, plus the two
+      # maps Play needs to make a crash report from an obfuscated build
+      # readable again.
+      - name: pack the Play bundle
+        run: |
+          mkdir -p play
+          cp app/build/app/outputs/bundle/release/*.aab play/qamus-release.aab
+          find app/build/app/outputs/mapping -name 'mapping.txt' \
+            -exec cp {} play/android-r8-mapping.txt \; 2>/dev/null || true
+          mkdir -p play/debug-symbols
+          cp -r app/build/symbols/. play/debug-symbols/ 2>/dev/null || true
+          if [ "${signed:-}" = "true" ]; then
+            state="signed with the repository's upload key"
+          else
+            state="SIGNED WITH THE DEBUG KEY — Play will reject it as is"
+          fi
+          cat > play/README.txt <<EOF
+          Google Play upload — قاموس المعاني
+          ==================================
+          application id : com.elyasomar.arabic.qamus
+          version        : ${APP_VERSION}
+          bundle         : qamus-release.aab  ($state)
+
+          Upload qamus-release.aab under Production > Create new release.
+
+          Deobfuscation. Play Console > App bundle explorer > Downloads:
+            android-r8-mapping.txt   the Java/Kotlin names R8 renamed
+            debug-symbols/           the Dart names --obfuscate renamed
+          Without both, a crash report from this build is unreadable.
+
+          Signing. If the line above says DEBUG KEY, add four repository
+          secrets and re-run this workflow:
+            ANDROID_KEYSTORE_BASE64    base64 of your upload-keystore.jks
+            ANDROID_KEYSTORE_PASSWORD
+            ANDROID_KEY_ALIAS
+            ANDROID_KEY_PASSWORD
+          Create the keystore once, and keep it — losing it means you can
+          never update this listing again:
+            keytool -genkey -v -keystore upload-keystore.jks -keyalg RSA \
+              -keysize 2048 -validity 10000 -alias upload
+            base64 -w0 upload-keystore.jks   # paste into the secret
+
+          Privacy policy (Play requires a public URL):
+            https://sites.google.com/view/qamoos-arabi/privacy
+            source: docs/privacy-policy.html in this repository
+          EOF
+          tar -C play -cf - . | xz -9e --threads=0 > qamus-googleplay.tar.xz
+          ls -lh play qamus-googleplay.tar.xz
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: qamus-googleplay
+          path: qamus-googleplay.tar.xz
+          compression-level: 0
           if-no-files-found: error
 
       - name: pack the remaining builds
@@ -246,6 +320,72 @@ jobs:
           tar -C out -cf - . | xz -9e --threads=0 > qamus-ios.tar.xz
           ls -lh qamus-ios.tar.xz
 
+      # What App Store Connect needs: an archive Xcode can open in the
+      # Organizer and distribute. Signing needs a paid Apple team, which CI
+      # does not have, so the archive is built unsigned and exported on the
+      # developer's own Mac with the plist beside it.
+      - name: build the App Store archive
+        working-directory: app
+        run: |
+          flutter build ipa --release --no-codesign \
+            --obfuscate --split-debug-info=build/symbols \
+            --tree-shake-icons \
+            --export-options-plist=ios/ExportOptions.plist || \
+          flutter build ipa --release --no-codesign \
+            --obfuscate --split-debug-info=build/symbols \
+            --tree-shake-icons
+          ls -R build/ios/archive || true
+
+      - name: pack the App Store archive
+        run: |
+          mkdir -p store
+          archive=$(find app/build/ios/archive -maxdepth 1 -name '*.xcarchive' | head -n 1)
+          [ -n "$archive" ] || { echo "no .xcarchive produced"; exit 1; }
+          cp -R "$archive" store/
+          cp app/ios/ExportOptions.plist store/
+          mkdir -p store/debug-symbols
+          cp -r app/build/symbols/. store/debug-symbols/ 2>/dev/null || true
+          # A signed .ipa, if flutter managed to export one without a team.
+          find app/build/ios/ipa -name '*.ipa' -exec cp {} store/ \; 2>/dev/null || true
+          cat > store/README.txt <<EOF
+          App Store upload — قاموس المعاني
+          ================================
+          bundle id : com.elyasomar.arabic.qamus
+          version   : ${APP_VERSION}
+          archive   : Runner.xcarchive (UNSIGNED — signing needs your team)
+
+          On your Mac, either:
+
+            1. Open Runner.xcarchive (double-click). Xcode Organizer opens.
+               Distribute App > App Store Connect > Upload. Xcode signs it
+               with your team along the way.
+
+            2. Or from the terminal, with ExportOptions.plist beside it:
+               xcodebuild -exportArchive \
+                 -archivePath Runner.xcarchive \
+                 -exportOptionsPlist ExportOptions.plist \
+                 -exportPath ./export
+               then upload export/*.ipa with Transporter.
+
+          Set teamID in ExportOptions.plist to your Apple team before
+          exporting from the terminal; Organizer asks for it instead.
+
+          debug-symbols/ holds the Dart names --obfuscate renamed. Keep them:
+          without them a crash report from this build is unreadable.
+
+          Privacy policy (App Store requires a public URL):
+            https://sites.google.com/view/qamoos-arabi/privacy
+          EOF
+          tar -C store -cf - . | xz -9e --threads=0 > qamus-appstore.tar.xz
+          ls -lh qamus-appstore.tar.xz
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: qamus-appstore
+          path: qamus-appstore.tar.xz
+          compression-level: 0
+          if-no-files-found: error
+
       - uses: actions/upload-artifact@v4
         with:
           name: qamus-ios
@@ -272,4 +412,5 @@ jobs:
             artifacts/**/*.tar.xz
             artifacts/**/*.apk.xz
             artifacts/**/*.exe.xz
+            artifacts/**/*.aab
           generate_release_notes: true

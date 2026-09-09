@@ -166,6 +166,10 @@ class _AppShellState extends State<AppShell> with WidgetsBindingObserver {
           if (i == _index) return;
           // The small tick a native app gives when a tab actually changes.
           HapticFeedback.selectionClick();
+          // The tabs live in an IndexedStack, so the search box is still
+          // alive behind whichever tab is showing. Dropping focus on the way
+          // out means it cannot bring the keyboard back with it.
+          FocusManager.instance.primaryFocus?.unfocus();
           setState(() => _index = i);
         },
         items: [

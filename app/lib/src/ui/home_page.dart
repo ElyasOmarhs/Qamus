@@ -258,6 +258,10 @@ class _Header extends StatelessWidget {
               child: TextField(
                 controller: controller,
                 focusNode: focus,
+                // Never asks for the keyboard on its own: it arrives when the
+                // reader taps this box, and leaves when they tap away.
+                autofocus: false,
+                onTapOutside: (_) => focus.unfocus(),
                 textInputAction: TextInputAction.search,
                 onChanged: onChanged,
                 onSubmitted: onSubmitted,
@@ -386,6 +390,9 @@ class _Results extends StatelessWidget {
 
     final scope = context.qamus;
     return ListView.separated(
+      // Reading a result means putting the keyboard away, which is what
+      // dragging the list says the reader wants.
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       padding: const EdgeInsets.fromLTRB(18, 4, 18, 150),
       itemCount: results.length + 1,
       separatorBuilder: (_, _) => const SizedBox(height: 8),

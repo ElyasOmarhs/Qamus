@@ -387,6 +387,8 @@ re-deflating an LZMA stream only makes it bigger.
 
 | Artifact | Contents |
 |---|---|
+| **`qamus-googleplay`** | the `.aab` Play wants, the R8 mapping and the Dart symbols it needs to read a crash report, and a README with the upload steps |
+| **`qamus-appstore`** | the `.xcarchive` Xcode Organizer distributes, `ExportOptions.plist` set to `app-store-connect`, the Dart symbols, and a README with both export routes |
 | `qamus-arm64-apk` | **`app-arm64-v8a-release.apk.xz`** — on its own, since it is what almost every phone needs |
 | `qamus-android-other` | the armeabi-v7a and x86_64 APKs, and the AAB |
 | `qamus-windows-exe` | **`qamus-setup.exe.xz`** — one self-contained Windows installer, built with Inno Setup |
@@ -394,6 +396,33 @@ re-deflating an LZMA stream only makes it bigger.
 | `qamus-ios` | unsigned `.ipa` |
 
 Pushing a `v*` tag additionally publishes them as a GitHub release.
+
+### Signing for the stores
+
+Neither store accepts what CI can produce on its own, and the reason is the
+same in both cases: signing needs a private key that must not live in a
+repository.
+
+**Google Play.** Add four repository secrets and the release build signs
+itself; without them the build still succeeds, the bundle is debug-signed, and
+the artifact's README says so in capitals rather than letting a rejected
+upload be the first you hear of it.
+
+| Secret | |
+|---|---|
+| `ANDROID_KEYSTORE_BASE64` | `base64 -w0 upload-keystore.jks` |
+| `ANDROID_KEYSTORE_PASSWORD` | |
+| `ANDROID_KEY_ALIAS` | |
+| `ANDROID_KEY_PASSWORD` | |
+
+`android/key.properties` and the keystore are written by CI at build time and
+are in `.gitignore` — losing that keystore means never being able to update
+the listing again, so keep a copy somewhere safe.
+
+**App Store.** Signing needs a paid Apple team enrolled on the machine, so CI
+builds the archive unsigned and stops there. Open `Runner.xcarchive` on a Mac
+and Organizer signs and uploads it, or run `xcodebuild -exportArchive` with the
+`ExportOptions.plist` in the same artifact after filling in `teamID`.
 
 ---
 

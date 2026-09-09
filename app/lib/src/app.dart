@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -163,7 +164,14 @@ class _QamusAppState extends State<QamusApp> {
                 },
               },
               child: Focus(
-                autofocus: true,
+                // Desktop only. The node exists so Escape reaches the
+                // bindings above when nothing else holds focus — but on a
+                // phone, taking focus at startup is how an app ends up
+                // showing a keyboard the reader never asked for.
+                autofocus: switch (defaultTargetPlatform) {
+                  TargetPlatform.android || TargetPlatform.iOS => false,
+                  _ => true,
+                },
                 // On a wide desktop window the app keeps a comfortable
                 // reading column rather than stretching a phone layout
                 // across two thousand pixels.
