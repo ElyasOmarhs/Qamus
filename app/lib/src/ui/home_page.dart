@@ -8,6 +8,7 @@ import '../data/models.dart';
 import '../theme.dart';
 import 'books_sheet.dart';
 import 'dashboard.dart';
+import 'deep_search_page.dart';
 import 'widgets/cards.dart';
 import 'widgets/common.dart';
 import 'widgets/motion.dart';
@@ -87,6 +88,19 @@ class _HomePageState extends State<HomePage> {
 
   void _openEntry(String key) => openEntry(context, key);
 
+  /// The search button beside the field: carries the typed word straight into
+  /// the lexicon text, without a trip to the floating button below.
+  void _deepSearch() {
+    final query = _controller.text.trim();
+    if (query.isEmpty) return;
+    _focus.unfocus();
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => DeepSearchPage(initialQuery: query),
+      ),
+    );
+  }
+
   void _setMode(SearchMode mode) {
     context.qamus.settings.setSearchMode(mode);
     if (_controller.text.isNotEmpty) _run(_controller.text);
@@ -119,6 +133,8 @@ class _HomePageState extends State<HomePage> {
               title: strings.appName,
               hint: strings.searchHint,
               clearLabel: strings.clear,
+              deepSearchLabel: strings.deepSearch,
+              onDeepSearch: _deepSearch,
               onChanged: _onQueryChanged,
               onSubmitted: _run,
               onClear: () {
@@ -186,6 +202,8 @@ class _Header extends StatelessWidget {
     required this.title,
     required this.hint,
     required this.clearLabel,
+    required this.deepSearchLabel,
+    required this.onDeepSearch,
     required this.onChanged,
     required this.onSubmitted,
     required this.onClear,
@@ -198,6 +216,8 @@ class _Header extends StatelessWidget {
   final String title;
   final String hint;
   final String clearLabel;
+  final String deepSearchLabel;
+  final VoidCallback onDeepSearch;
   final ValueChanged<String> onChanged;
   final ValueChanged<String> onSubmitted;
   final VoidCallback onClear;
@@ -269,13 +289,31 @@ class _Header extends StatelessWidget {
                 decoration: InputDecoration(
                   hintText: hint,
                   prefixIcon: Icon(Icons.search_rounded, color: scheme.primary),
+                  // In Arabic this edge is the visual left of the field: the
+                  // clear button, and beside it the one that takes the typed
+                  // word into the lexicon text itself.
                   suffixIcon: AnimatedScale(
                     scale: value.text.isEmpty ? 0 : 1,
                     duration: const Duration(milliseconds: 200),
-                    child: IconButton(
-                      tooltip: clearLabel,
-                      icon: const Icon(Icons.cancel_rounded),
-                      onPressed: onClear,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          tooltip: clearLabel,
+                          icon: const Icon(Icons.cancel_rounded),
+                          onPressed: onClear,
+                        ),
+                        Tooltip(
+                          message: deepSearchLabel,
+                          child: IconButton(
+                            icon: const Icon(Icons.travel_explore_rounded),
+                            color: QamusTheme.emerald,
+                            onPressed: value.text.trim().isEmpty
+                                ? null
+                                : onDeepSearch,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                   contentPadding: const EdgeInsets.symmetric(

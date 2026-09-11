@@ -477,7 +477,9 @@ class _LanguageRow extends StatelessWidget {
                         ),
                       ),
                       Text(
-                        locale.englishName,
+                        locale == AppLocale.en
+                            ? context.str.localeNote
+                            : locale.englishName,
                         style: theme.textTheme.labelSmall,
                       ),
                     ],

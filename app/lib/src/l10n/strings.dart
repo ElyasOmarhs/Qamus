@@ -1,6 +1,6 @@
 import 'locales.dart';
 
-/// Every piece of interface text, in all four languages.
+/// Every piece of interface text, in Arabic and English.
 ///
 /// Each getter reads `_pick(arabic, pashto, persian, english)`, so a
 /// translation sits beside its siblings and a missing one is impossible to
@@ -12,14 +12,20 @@ class Strings {
 
   final AppLocale locale;
 
-  String _pick(String ar, String ps, String fa, String en) => switch (locale) {
-    AppLocale.ar => ar,
-    AppLocale.ps => ps,
-    AppLocale.fa => fa,
-    AppLocale.en => en,
-  };
+  // The Pashto and Persian columns are kept beside their siblings so a
+  // translation is never lost, but only Arabic and English are offered.
+  String _pick(String ar, String ps, String fa, String en) =>
+      locale == AppLocale.en ? en : ar;
 
   String n(int value) => locale.number(value);
+
+  /// Shown in small type beside English: only the interface changes language.
+  String get localeNote => _pick(
+    'لغة التطبيق فقط — نصّ المعاجم يبقى بالعربية',
+    'یوازې د اپلیکیشن ژبه — د معاجمو متن په عربي پاتې کیږي',
+    'تنها زبان برنامه — متن فرهنگ‌ها عربی می‌ماند',
+    'App language only — the lexicon text stays Arabic',
+  );
 
   // ------------------------------------------------------------- identity
   String get appName => _pick(
@@ -77,7 +83,7 @@ class Strings {
     'Search any way you like',
   );
   String get introBody2 => _pick(
-    'ابحث بأوّل الكلمة أو بآخرها — اكتب «يب» لترى كل ما ينتهي بها — أو بالجذر، أو داخل نصّ الشروح نفسها.',
+    'ابحث بأوّل الكلمة أو بآخرها — اكتب «يب» لترى كل ما ينتهي بها — أو بالجذر، أو داخل نصّ المعاجم نفسها.',
     'د کلمې له پیل یا له پای څخه ولټوئ — «يب» ولیکئ او هغه ټولې کلمې وګورئ چې پرې پای ته رسېږي — یا په جذر، یا د شرحو په متن کې.',
     'از آغاز واژه یا از پایان آن جستجو کنید — «يب» را بنویسید تا هرچه به آن ختم می‌شود ببینید — یا با ریشه، یا درون متن شرح‌ها.',
     'Search by how a word starts or how it ends — type "يب" to see everything ending in it — or by root, or inside the definitions themselves.',
@@ -178,7 +184,7 @@ class Strings {
     'Search definitions',
   );
   String get deepSearchDetail => _pick(
-    'فتّش داخل نصّ الشروح كلّها',
+    'فتّش داخل نصّ المعاجم كلّها',
     'د ټولو شرحو په متن کې وپلټئ',
     'درون متن همهٔ شرح‌ها بگردید',
     'Look inside the full text of every definition',
@@ -222,7 +228,7 @@ class Strings {
     'Synonyms & antonyms',
   );
   String get definitions => _pick(
-    'شروح ومعانٍ',
+    'قواميس ومعانٍ',
     'شرحې او معناګانې',
     'شرح‌ها و معناها',
     'Definitions',
@@ -244,7 +250,7 @@ class Strings {
 
   /// A lookup form can explain several headwords at once — مهاب reaches five.
   String explainsCount(int count) => _pick(
-    'يشرح ${n(count)} مداخل',
+    'يُبيّن ${n(count)} مداخل',
     '${n(count)} سرلیکونه شرحوي',
     '${n(count)} سرمدخل را شرح می‌دهد',
     'explains ${n(count)} headwords',
@@ -276,7 +282,7 @@ class Strings {
     'This entry was not found',
   );
   String get noDefinition => _pick(
-    'لا يوجد شرح مسجّل',
+    'لا يوجد قاموس مسجّل',
     'شرح نه دی ثبت شوی',
     'شرحی ثبت نشده است',
     'No definition recorded',
@@ -313,7 +319,7 @@ class Strings {
 
   // ---------------------------------------------------------- deep search
   String get deepSearchHint => _pick(
-    'كلمة أو عبارة داخل الشروح…',
+    'كلمة أو عبارة داخل المعاجم…',
     'د شرحو دننه کلمه یا عبارت…',
     'واژه یا عبارتی درون شرح‌ها…',
     'A word or phrase inside the definitions…',
@@ -325,19 +331,19 @@ class Strings {
     'Search inside the lexicon text',
   );
   String get deepSearchEmptyDetail => _pick(
-    'اعثر على الكلمة ولو لم تكن هي المدخل، بل ورَدت في شرحه',
+    'اعثر على الكلمة ولو لم تكن هي المدخل، بل ورَدت في معاجمه',
     'کلمه ومومئ که څه هم مدخل نه وي، بلکې د هغه په شرح کې راغلې وي',
     'واژه را بیابید حتی اگر مدخل نباشد، بلکه در شرح آن آمده باشد',
     'Find a word even when it is not the headword, but appears in its definition',
   );
   String get deepSearchRunning => _pick(
-    'جارٍ التفتيش في الشروح…',
+    'جارٍ التفتيش في المعاجم…',
     'په شرحو کې پلټنه روانه ده…',
     'در حال گشتن میان شرح‌ها…',
     'Searching through the definitions…',
   );
   String get deepSearchRunningDetail => _pick(
-    'يُفكّ ضغط الشروح ويُفتَّش فيها مقطعًا بعد مقطع',
+    'يُفكّ ضغط المعاجم ويُفتَّش فيها مقطعًا بعد مقطع',
     'شرحې له کمپریشن څخه راوځي او بلاک په بلاک پلټل کیږي',
     'شرح‌ها از فشرده‌سازی بیرون می‌آیند و بلوک به بلوک جستجو می‌شوند',
     'Definitions are inflated and searched, block by block',
@@ -385,7 +391,7 @@ class Strings {
 
   String get reading => _pick('القراءة', 'لوستل', 'خواندن', 'Reading');
   String get textSize => _pick(
-    'حجم نصّ الشروح',
+    'حجم نصّ المعاجم',
     'د شرحو د متن اندازه',
     'اندازهٔ متن شرح‌ها',
     'Definition text size',
@@ -476,7 +482,7 @@ class Strings {
   );
 
   String get howItWorksBody => _pick(
-    'تُخزَّن الشروح في كتل مضغوطة من ٥١٢ مدخلًا، فيكفي فكّ كتلة واحدة لعرض كلمة. ومفتاح البحث يُجرَّد من التشكيل وصور الهمزة، فتجد الكلمة كما تكتبها. أمّا البحث بآخر الكلمة فيتمّ على مفتاح معكوس، ولذلك هو سريع كالبحث بأوّلها.',
+    'تُخزَّن المعاجم في كتل مضغوطة من ٥١٢ مدخلًا، فيكفي فكّ كتلة واحدة لعرض كلمة. ومفتاح البحث يُجرَّد من التشكيل وصور الهمزة، فتجد الكلمة كما تكتبها. أمّا البحث بآخر الكلمة فيتمّ على مفتاح معكوس، ولذلك هو سريع كالبحث بأوّلها.',
     'شرحې د ۵۱۲ مدخلونو په کمپرس شویو بلاکونو کې خوندي دي، نو د یوې کلمې لپاره یوازې یو بلاک پرانیستل کافي دي. د لټون کلید له تشکیل او د همزې له بڼو پاکیږي، نو کلمه هماغسې مومئ لکه څنګه یې چې لیکئ. د پای لټون پر معکوس کلید کیږي، نو د پیل د لټون هومره ګړندی دی.',
     'شرح‌ها در بلوک‌های فشردهٔ ۵۱۲ مدخلی نگهداری می‌شوند، پس برای یک واژه تنها یک بلوک باز می‌شود. کلید جستجو از اِعراب و شکل‌های همزه پیراسته می‌شود، پس واژه را همان‌گونه که می‌نویسید می‌یابید. جستجوی پایانی روی کلید وارونه انجام می‌شود و به همان سرعت جستجوی آغازین است.',
     'Definitions are stored in compressed blocks of 512 entries, so showing a word inflates just one block. The search key is stripped of diacritics and hamza seats, so you find a word however you type it. "Ends with" runs over a reversed key, which is why it is as fast as "starts with".',
@@ -583,13 +589,13 @@ class Strings {
 
   // ---------------------------------------------------------------- entry
   String get copySense => _pick(
-    'نسخ هذا الشرح',
+    'نسخ هذا القاموس',
     'دا شرح کاپي کړئ',
     'رونوشت این شرح',
     'Copy this definition',
   );
   String get senseCopied => _pick(
-    'نُسخ الشرح مع اسم معجمه',
+    'نُسخ القاموس مع اسم معجمه',
     'شرح د خپل معجم له نامه سره کاپي شو',
     'شرح همراه نام فرهنگش رونوشت شد',
     'Definition copied, with its lexicon',
@@ -608,7 +614,7 @@ class Strings {
     'How to use it',
   );
   String get guideDetail => _pick(
-    'شرح كل زرّ بلغة بسيطة، مع صورته',
+    'بيان كل زرّ بلغة بسيطة، مع صورته',
     'د هر تڼۍ ساده تشریح، د خپلې بڼې سره',
     'شرح هر دکمه به زبان ساده، همراه شکلش',
     'Every button explained in plain words, with its picture',
@@ -755,7 +761,7 @@ class Strings {
 
   String get guideBooksBody => _pick(
     'هذا المعجم ستّة معاجم في واحد. بهذا الزرّ تقول له: خذني إلى معجم بعينه، '
-        'أو افتح لي الستّة جميعًا. وإذا غاب عنك شرحٌ تنتظره، فانظر هنا أوّلًا — '
+        'أو افتح لي الستّة جميعًا. وإذا غاب عنك قاموسٌ تنتظره، فانظر هنا أوّلًا — '
         'لعلّ معجمه مطفأ.',
     'دا قاموس په یوه کې شپږ معاجم دي. په دې تڼۍ ورته وایاست: یوه معین معجم '
         'ته مې بوځه، یا ټول شپږ راته خلاص کړه. که کوم شرح چې تمه یې لرئ ونه '
@@ -771,7 +777,7 @@ class Strings {
 
   String get guideDeepBody => _pick(
     'أحيانًا تعرف المعنى ولا تذكر الكلمة. هنا لا يبحث المعجم في المداخل، '
-        'بل يقرأ الشروح كلّها حرفًا حرفًا حتى يجد ما وصفته. '
+        'بل يقرأ المعاجم كلّها حرفًا حرفًا حتى يجد ما وصفته. '
         'وهو أبطأ من إخوته لأنّه يقرأ كتابًا كاملًا لأجلك — فامنحه لحظة.',
     'کله کله معنا پېژنئ خو کلمه مو نه یادیږي. دلته قاموس په مدخلونو کې نه '
         'لټوي، بلکې ټولې شرحې حرف په حرف لولي ترڅو هغه ومومي چې تاسو یې '
@@ -787,7 +793,7 @@ class Strings {
         'because it reads a whole book for you — so give it a moment.',
   );
   String get guideDeepExample => _pick(
-    'اكتب «الأسد» — تأتيك كل كلمة ذُكر الأسد في شرحها، ولو لم تكن هي «أسد».',
+    'اكتب «الأسد» — تأتيك كل كلمة ذُكر الأسد في قاموسها، ولو لم تكن هي «أسد».',
     '«الأسد» ولیکئ — هره کلمه راځي چې زمری یې په شرح کې یاد شوی، که څه هم '
         'پخپله «أسد» نه وي.',
     '«الأسد» بنویسید — هر واژه‌ای می‌آید که شیر در شرحش یاد شده، هرچند خودش '
@@ -797,8 +803,8 @@ class Strings {
   );
 
   String get guideEntryBody => _pick(
-    'حين تلمس كلمة تُفتح لك صفحتها. الشروح فيها مرقّمة: ١، ٢، ٣ — '
-        'فتعرف كم شرحًا لهذه الكلمة، وأين أنت منها. وفوق كل مجموعة اسمُ '
+    'حين تلمس كلمة تُفتح لك صفحتها. القواميس فيها مرقّمة: ١، ٢، ٣ — '
+        'فتعرف كم قاموسًا لهذه الكلمة، وأين أنت منها. وفوق كل مجموعة اسمُ '
         'المعجم الذي جاءت منه، ملوّنًا بلونه.',
     'کله چې یوه کلمه ولمسئ، پاڼه یې پرانیستل کیږي. شرحې پکې شمېرل شوې دي: '
         '۱، ۲، ۳ — نو پوهیږئ چې دې کلمې څو شرحې لري او تاسو په کومې کې یاست. '
@@ -813,7 +819,7 @@ class Strings {
   );
 
   String get guideCopyBody => _pick(
-    'بجانب كل شرحٍ زرٌّ صغير للنسخ. تضغطه فيُؤخذ الشرح كلّه — نصّه والكلمة '
+    'بجانب كل قاموسٍ زرٌّ صغير للنسخ. تضغطه فيُؤخذ القاموس كلّه — نصّه والكلمة '
         'واسم معجمه — إلى الحافظة، فتلصقه في رسالة أو دفتر أو بحث. '
         'وفي أعلى الصفحة زرٌّ ينسخ المدخل بأكمله دفعةً واحدة.',
     'د هرې شرحې څنګ ته یوه کوچنۍ د کاپي تڼۍ ده. کېکاږئ یې، نو ټوله شرح — '
@@ -866,18 +872,17 @@ class Strings {
         'you would rather have bare text.',
   );
   String get guideLanguageBody => _pick(
-    'تُترجَم كل كتابة في التطبيق إلى لغتك — عربية أو پښتو أو فارسية أو '
-        'إنجليزية. أمّا شروح المعاجم فتبقى بالعربية دائمًا، لأنّها هي '
-        'الكتب نفسها ولا تُترجَم.',
+    'تُترجَم كل كتابة في التطبيق إلى لغتك — عربية أو إنجليزية. أمّا نصّ '
+        'المعاجم فيبقى بالعربية دائمًا، لأنّها هي الكتب نفسها ولا تُترجَم.',
     'په اپلیکیشن کې هره لیکنه ستاسو ژبې ته ژباړل کیږي — عربي، پښتو، فارسي '
         'یا انګلیسي. خو د معاجمو شرحې تل په عربي پاتې کیږي، ځکه هغه پخپله '
         'کتابونه دي او نه ژباړل کیږي.',
     'هر نوشتهٔ برنامه به زبان شما برگردانده می‌شود — عربی، پشتو، فارسی یا '
         'انگلیسی. اما شرح‌های فرهنگ‌ها همیشه عربی می‌مانند، زیرا خودِ '
         'کتاب‌هایند و ترجمه نمی‌شوند.',
-    'Every word of the interface is translated into your language — Arabic, '
-        'Pashto, Persian or English. The lexicon definitions stay Arabic, '
-        'because they are the books themselves and are not translated.',
+    'Every word of the interface is translated into your language — Arabic '
+        'or English. The lexicon text stays Arabic, because these are the '
+        'books themselves and are not translated.',
   );
   String get guideOfflineBody => _pick(
     'المعجم كلّه في جهازك، لا في الإنترنت. يعمل في الطائرة، وفي القرية، '
@@ -908,7 +913,7 @@ class Strings {
     'May we wake you with a word?',
   );
   String get dailyWordAskDetail => _pick(
-    'كل صباح كلمة واحدة من المعاجم الستّة، بشرحها. لا شيء غيرها — '
+    'كل صباح كلمة واحدة من المعاجم الستّة، بمعناها. لا شيء غيرها — '
         'ولا إعلان، ولا اتصال بالإنترنت.',
     'هر سهار له شپږو معاجمو یوه کلمه، له خپلې شرحې سره. بل هېڅ نه — '
         'نه اعلان، نه له انټرنټ سره اړیکه.',
@@ -1270,7 +1275,7 @@ class Strings {
   );
 
   String senses(int count) => _pick(
-    _arabicCount(count, 'شرح واحد', 'شرحان', 'شروح', 'شرحًا'),
+    _arabicCount(count, 'قاموس واحد', 'قاموسان', 'قواميس', 'قاموسًا'),
     '${n(count)} شرحې',
     '${n(count)} شرح',
     count == 1 ? '1 sense' : '${n(count)} senses',

@@ -640,8 +640,6 @@ class _LanguagePreview extends StatelessWidget {
       runSpacing: 8,
       children: [
         _Tag('العربية', QamusTheme.violet),
-        _Tag('پښتو', QamusTheme.blue),
-        _Tag('فارسی', QamusTheme.cyan),
         _Tag('English', QamusTheme.emerald),
       ],
     ),

@@ -256,8 +256,6 @@ void main() {
       tester,
     ) async {
       expect(const Strings(AppLocale.ar).n(2026), '٢٬٠٢٦');
-      expect(const Strings(AppLocale.fa).n(2026), '۲٬۰۲۶');
-      expect(const Strings(AppLocale.ps).n(2026), '۲٬۰۲۶');
       expect(const Strings(AppLocale.en).n(2026), '2,026');
     });
 
@@ -1298,6 +1296,36 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.byType(DeepSearchPage), findsOneWidget);
     });
+
+    testWidgets('the search bar carries its own button into the lexicons', (
+      tester,
+    ) async {
+      await pumpApp(tester);
+      final barButton = find.descendant(
+        of: find.byType(TextField),
+        matching: find.byIcon(Icons.travel_explore_rounded),
+      );
+      // Hidden while the box is empty, so it never invites an empty search.
+      expect(
+        tester
+            .widget<IconButton>(
+              find.ancestor(of: barButton, matching: find.byType(IconButton)),
+            )
+            .onPressed,
+        isNull,
+      );
+
+      await tester.enterText(find.byType(TextField).first, 'كتب');
+      await tester.pump(const Duration(milliseconds: 300));
+      await tester.pumpAndSettle();
+
+      expect(barButton, findsOneWidget);
+      await tester.tap(barButton);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(DeepSearchPage), findsOneWidget);
+      expect(find.text('كتب'), findsWidgets);
+    });
   });
 
   group('the introduction', () {
@@ -1443,11 +1471,11 @@ void main() {
       final settings = await pumpApp(
         tester,
         home: const AppShell(),
-        prefs: {'locale': 'ps', 'onboarded': true},
+        prefs: {'locale': 'en', 'onboarded': true},
       );
-      expect(settings.chosenLocale, AppLocale.ps);
+      expect(settings.chosenLocale, AppLocale.en);
       expect(settings.onboarded, isTrue);
-      expect(find.text(const Strings(AppLocale.ps).navHome), findsOneWidget);
+      expect(find.text(const Strings(AppLocale.en).navHome), findsOneWidget);
     });
   });
 

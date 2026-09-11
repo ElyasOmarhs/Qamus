@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 
-/// The four languages the interface speaks.
+/// The two languages the interface speaks.
 ///
 /// Arabic is the default: the corpus itself is Arabic, so it is the language
 /// the app is read in unless the reader says otherwise on first launch.
 enum AppLocale {
   ar('ar', 'العربية', 'Arabic', TextDirection.rtl, _arabicIndic),
-  ps('ps', 'پښتو', 'Pashto', TextDirection.rtl, _easternArabicIndic),
-  fa('fa', 'فارسی', 'Persian', TextDirection.rtl, _easternArabicIndic),
   en('en', 'English', 'English', TextDirection.ltr, _western);
 
   const AppLocale(
@@ -31,7 +29,6 @@ enum AppLocale {
   bool get isRtl => textDirection == TextDirection.rtl;
 
   static const _arabicIndic = 0x0660; // ٠١٢٣٤٥٦٧٨٩
-  static const _easternArabicIndic = 0x06F0; // ۰۱۲۳۴۵۶۷۸۹
   static const _western = 0x0030;
 
   static AppLocale fromCode(String? code) => AppLocale.values.firstWhere(

@@ -6,8 +6,8 @@ iOS** لپاره جوړېږي. ټول ۲۱۹٬۷۶۴ مدخلونه له شپږ�
 
 An offline Arabic–Arabic dictionary: 219,764 entries from six lexicons and the
 source's 176,036-form morphological index, packed into a 10.9 MB asset with
-**not one character removed**, and an interface that speaks Pashto, Persian,
-Arabic and English.
+**not one character removed**, and an interface that speaks Arabic and
+English — the lexicon text itself always stays Arabic.
 
 ![the launcher mark](docs/icon.png)
 
@@ -34,7 +34,7 @@ Arabic and English.
 
 | | |
 |---|---|
-| **څلور ژبې** | عربي (ډیفالټ)، پښتو، فارسي، انګلیسي — هر توری د اپلیکیشن ژباړل کیږي |
+| **دوه ژبې** | عربي (ډیفالټ) او انګلیسي — یوازې د اپلیکیشن ژبه بدلیږي، د معاجمو متن تل عربي دی |
 | **ژوندی لټون** | له لومړي حرف څخه سمدستي وړاندیزونه؛ ټول شکلونه د یوې کلمې لاندې |
 | **د پای لټون** | «ينتهي بـ» — ووایه چې کومې کلمې په «يب» پای ته رسېږي |
 | **د کتاب فلټر** | یو معجم، څو، یا ټول شپږ |

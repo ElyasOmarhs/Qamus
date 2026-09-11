@@ -257,7 +257,12 @@ class _LanguageTile extends StatelessWidget {
                             : scheme.onSurface,
                       ),
                     ),
-                    if (locale.englishName != locale.nativeName)
+                    if (locale == AppLocale.en)
+                      Text(
+                        context.str.localeNote,
+                        style: theme.textTheme.labelSmall,
+                      )
+                    else if (locale.englishName != locale.nativeName)
                       Text(
                         locale.englishName,
                         style: theme.textTheme.labelSmall,
