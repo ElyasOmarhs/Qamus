@@ -153,11 +153,10 @@ class WordNotifications {
           // returns null; that is a grant, not a refusal.
           final granted =
               await android?.requestNotificationsPermission() ?? true;
-          if (!granted) return false;
-          // Delivering at a chosen hour is an alarm, not a plain toast. If
-          // the exact variant is refused we still schedule — inexactly.
-          await android?.requestExactAlarmsPermission();
-          return true;
+          // The daily word is deliberately scheduled inexactly below. Do not
+          // request exact-alarm access: it is unnecessary for this feature
+          // and is a restricted permission on Google Play.
+          return granted;
 
         case NotifyPlatform.ios:
           final ios = _plugin!
