@@ -3,7 +3,7 @@ name: build
 # Produces installable binaries for Android, Windows and iOS, then re-packs
 # each one as an .tar.xz archive compressed with LZMA2 at its extreme preset.
 # GitHub always serves artifacts inside a zip envelope; putting an already
-# maximally-compressed .tar.xz inside that zip is what keeps the download small.
+# maximally-compressed  .tar.xz inside that zip is what keeps the download small.
 
 on:
   push:
