@@ -327,7 +327,15 @@ class _DailyWordControlsState extends State<_DailyWordControls> {
     if (!mounted) return;
     if (wanted && !allowed) {
       messenger.showSnackBar(
-        SnackBar(content: Text(strings.notificationsBlocked)),
+        SnackBar(
+          content: Text(strings.notificationsBlocked),
+          action: SnackBarAction(
+            label: strings.navSettings,
+            onPressed: () async {
+              await scope.notifications.openSettings();
+            },
+          ),
+        ),
       );
     }
     setState(() => _busy = false);

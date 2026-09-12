@@ -1,7 +1,6 @@
-import 'dart:io';
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:timezone/data/latest_all.dart' as tz;
 import 'package:timezone/timezone.dart' as tz;
 
@@ -77,24 +76,28 @@ class WordNotifications {
 
   static NotifyPlatform get platform {
     if (kIsWeb) return NotifyPlatform.other;
-    if (Platform.isAndroid) return NotifyPlatform.android;
-    if (Platform.isIOS) return NotifyPlatform.ios;
-    if (Platform.isWindows) return NotifyPlatform.windows;
-    return NotifyPlatform.other;
+    return switch (defaultTargetPlatform) {
+      TargetPlatform.android => NotifyPlatform.android,
+      TargetPlatform.iOS => NotifyPlatform.ios,
+      TargetPlatform.windows => NotifyPlatform.windows,
+      _ => NotifyPlatform.other,
+    };
   }
 
-  /// True where this build can actually deliver a *scheduled* notification.
-  ///
-  /// Linux is deliberately absent. The plugin can post a notification there,
-  /// but `zonedSchedule` is unimplemented, so offering a word each morning
-  /// would be a promise the platform never keeps — better to say plainly that
-  /// it cannot than to leave a switch on that does nothing.
   static bool get isSupported =>
       !kIsWeb &&
-      (Platform.isAndroid ||
-          Platform.isIOS ||
-          Platform.isWindows ||
-          Platform.isMacOS);
+      (defaultTargetPlatform == TargetPlatform.android ||
+          defaultTargetPlatform == TargetPlatform.iOS ||
+          defaultTargetPlatform == TargetPlatform.windows ||
+          defaultTargetPlatform == TargetPlatform.macOS);
+
+  Future<void> _refreshTimezone() async {
+    final zone = await FlutterTimezone.getLocalTimezone();
+    // initializeTimeZones alone leaves tz.local at UTC, not the device zone.
+    tz.setLocalLocation(tz.getLocation(zone.identifier));
+  }
+
+  Future<void> _scheduleQueue = Future<void>.value();
 
   /// Prepares the plugin and the timezone database.
   ///
@@ -149,14 +152,12 @@ class WordNotifications {
               .resolvePlatformSpecificImplementation<
                 AndroidFlutterLocalNotificationsPlugin
               >();
-          // Below Android 13 there is no runtime permission and the call
-          // returns null; that is a grant, not a refusal.
-          final granted =
-              await android?.requestNotificationsPermission() ?? true;
+          if (android == null) return false;
+          final granted = await android.requestNotificationsPermission();
           // The daily word is deliberately scheduled inexactly below. Do not
           // request exact-alarm access: it is unnecessary for this feature
           // and is a restricted permission on Google Play.
-          return granted;
+          return granted ?? await android.areNotificationsEnabled() ?? false;
 
         case NotifyPlatform.ios:
           final ios = _plugin!
@@ -171,11 +172,33 @@ class WordNotifications {
               false;
 
         case NotifyPlatform.windows:
-        case NotifyPlatform.other:
           return true;
+        case NotifyPlatform.other:
+          final macOS = _plugin!
+              .resolvePlatformSpecificImplementation<
+                MacOSFlutterLocalNotificationsPlugin
+              >();
+          return await macOS?.requestPermissions(
+                alert: true,
+                badge: true,
+                sound: true,
+              ) ??
+              false;
       }
     } catch (error) {
       debugPrint('notification permission request failed: $error');
+      return false;
+    }
+  }
+
+  /// Opens notification settings, never the unrelated exact-alarm screen.
+  Future<bool> openSettings() async {
+    await init();
+    if (!_ready) return false;
+    try {
+      return await _plugin!.openAppNotificationSettings() ?? false;
+    } catch (error) {
+      debugPrint('could not open notification settings: $error');
       return false;
     }
   }
@@ -187,6 +210,17 @@ class WordNotifications {
   Future<void> reschedule({
     required Dictionary dictionary,
     required Settings settings,
+  }) {
+    // Resume and settings changes must not interleave cancellation and queuing.
+    _scheduleQueue = _scheduleQueue.then(
+      (_) => _reschedule(dictionary: dictionary, settings: settings),
+    );
+    return _scheduleQueue;
+  }
+
+  Future<void> _reschedule({
+    required Dictionary dictionary,
+    required Settings settings,
   }) async {
     await init();
     if (!_ready) return;
@@ -194,21 +228,13 @@ class WordNotifications {
       await cancelAll();
       if (!settings.dailyWord) return;
 
+      // Re-read on every rebuild in case the user changed the device zone.
+      // If lookup fails, do not silently queue reminders in UTC.
+      await _refreshTimezone();
       final now = tz.TZDateTime.now(tz.local);
-      final hour = settings.dailyWordHour;
       var queued = 0;
 
-      for (var day = 0; day < _horizon + 1 && queued < _horizon; day++) {
-        final when = tz.TZDateTime(
-          tz.local,
-          now.year,
-          now.month,
-          now.day + day,
-          hour,
-        );
-        // Today's slot has usually gone by the time the app is opened.
-        if (!when.isAfter(now)) continue;
-
+      for (final when in dailyWordTimes(now, settings.dailyWordHour)) {
         final word = dictionary.wordOfDay(when);
         if (word == null) continue;
 
@@ -259,4 +285,21 @@ class WordNotifications {
     linux: LinuxNotificationDetails(),
     windows: WindowsNotificationDetails(),
   );
+}
+
+/// Calendar construction keeps the chosen local hour across DST transitions.
+@visibleForTesting
+List<tz.TZDateTime> dailyWordTimes(tz.TZDateTime now, int hour) {
+  final times = <tz.TZDateTime>[];
+  for (var day = 0; times.length < WordNotifications._horizon; day++) {
+    final when = tz.TZDateTime(
+      now.location,
+      now.year,
+      now.month,
+      now.day + day,
+      hour,
+    );
+    if (when.isAfter(now)) times.add(when);
+  }
+  return times;
 }

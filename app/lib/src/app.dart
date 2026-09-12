@@ -65,7 +65,7 @@ class QamusApp extends StatefulWidget {
   State<QamusApp> createState() => _QamusAppState();
 }
 
-class _QamusAppState extends State<QamusApp> {
+class _QamusAppState extends State<QamusApp> with WidgetsBindingObserver {
   final _bootstrap = DatabaseBootstrap();
   final _navigator = GlobalKey<NavigatorState>();
 
@@ -83,6 +83,7 @@ class _QamusAppState extends State<QamusApp> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _start();
     Future<void>.delayed(const Duration(milliseconds: 2100), () {
       if (mounted) setState(() => _splashSettled = true);
@@ -111,6 +112,19 @@ class _QamusAppState extends State<QamusApp> {
     }
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final dictionary = _dictionary;
+    final settings = _settings;
+    if (state == AppLifecycleState.resumed &&
+        dictionary != null &&
+        settings != null) {
+      unawaited(
+        _notifications.reschedule(dictionary: dictionary, settings: settings),
+      );
+    }
+  }
+
   /// Guards the dialog against a second Escape while the first is open.
   bool _leaving = false;
 
@@ -132,6 +146,7 @@ class _QamusAppState extends State<QamusApp> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _bootstrap.dispose();
     _dictionary?.dispose();
     super.dispose();

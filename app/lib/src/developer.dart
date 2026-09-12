@@ -37,4 +37,4 @@ class Developer {
 ///
 /// Kept in step with `pubspec.yaml` by hand: reading it at runtime would mean
 /// another plugin for a string that changes once a release.
-const String kAppVersion = '1.3.0';
+const String kAppVersion = '1.3.1';

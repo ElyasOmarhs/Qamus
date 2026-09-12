@@ -39,7 +39,7 @@ class Strings {
     'معجم عربي — عربي بين يديك، دون اتصال',
     'عربي – عربي قاموس، بې انټرنټه ستاسو په لاس کې',
     'فرهنگ عربی — عربی، بدون نیاز به اینترنت',
-    'An Arabic–Arabic dictionary, offline and in your hand',
+    'An offline Arabic–Arabic dictionary at your fingertips',
   );
 
   // ---------------------------------------------------------- onboarding
@@ -163,7 +163,7 @@ class Strings {
     'جرّب نمط بحث آخر، أو وسّع نطاق المعاجم المحدّدة',
     'بل ډول لټون وازمویئ، یا نور معاجم فعال کړئ',
     'شیوهٔ دیگری از جستجو را بیازمایید، یا فرهنگ‌های بیشتری را فعال کنید',
-    'Try another search mode, or widen the selected lexicons',
+    'Try another search mode, or select more lexicons',
   );
   String get searchingLabel =>
       _pick('جارٍ البحث…', 'لټون روان دی…', 'در حال جستجو…', 'Searching…');
@@ -228,7 +228,7 @@ class Strings {
     'Synonyms & antonyms',
   );
   String get definitions => _pick(
-    'قواميس ومعانٍ',
+    'شروح ومعانٍ',
     'شرحې او معناګانې',
     'شرح‌ها و معناها',
     'Definitions',
@@ -250,10 +250,10 @@ class Strings {
 
   /// A lookup form can explain several headwords at once — مهاب reaches five.
   String explainsCount(int count) => _pick(
-    'يُبيّن ${n(count)} مداخل',
+    'عدد المداخل المشروحة: ${n(count)}',
     '${n(count)} سرلیکونه شرحوي',
     '${n(count)} سرمدخل را شرح می‌دهد',
-    'explains ${n(count)} headwords',
+    count == 1 ? 'Explains 1 headword' : 'Explains ${n(count)} headwords',
   );
 
   String get similarWords =>
@@ -282,7 +282,7 @@ class Strings {
     'This entry was not found',
   );
   String get noDefinition => _pick(
-    'لا يوجد قاموس مسجّل',
+    'لا يوجد شرح مسجّل',
     'شرح نه دی ثبت شوی',
     'شرحی ثبت نشده است',
     'No definition recorded',
@@ -331,7 +331,7 @@ class Strings {
     'Search inside the lexicon text',
   );
   String get deepSearchEmptyDetail => _pick(
-    'اعثر على الكلمة ولو لم تكن هي المدخل، بل ورَدت في معاجمه',
+    'اعثر على الكلمة ولو لم تكن هي المدخل، بل وردت في أحد الشروح',
     'کلمه ومومئ که څه هم مدخل نه وي، بلکې د هغه په شرح کې راغلې وي',
     'واژه را بیابید حتی اگر مدخل نباشد، بلکه در شرح آن آمده باشد',
     'Find a word even when it is not the headword, but appears in its definition',
@@ -343,10 +343,10 @@ class Strings {
     'Searching through the definitions…',
   );
   String get deepSearchRunningDetail => _pick(
-    'يُفكّ ضغط المعاجم ويُفتَّش فيها مقطعًا بعد مقطع',
+    'جارٍ البحث في الشروح. قد يستغرق ذلك لحظات.',
     'شرحې له کمپریشن څخه راوځي او بلاک په بلاک پلټل کیږي',
     'شرح‌ها از فشرده‌سازی بیرون می‌آیند و بلوک به بلوک جستجو می‌شوند',
-    'Definitions are inflated and searched, block by block',
+    'Searching the definitions. This may take a moment.',
   );
   String get stop => _pick('إيقاف', 'ودرول', 'توقف', 'Stop');
   String get search => _pick('ابحث', 'ولټوئ', 'جستجو', 'Search');
@@ -468,10 +468,10 @@ class Strings {
   String get version => _pick('الإصدار', 'نسخه', 'نسخه', 'Version');
 
   String aboutProgramBody(String entries, String books) => _pick(
-    'معجم عربي عربي يعمل دون اتصال بالإنترنت، مبنيّ على $entries مدخلًا من $books معاجم، مضغوطة كلّها في ملف واحد داخل التطبيق. لا يرسل شيئًا ولا يطلب أذونات.',
+    'معجم عربي عربي يعمل دون اتصال بالإنترنت، مبنيّ على $entries مدخلًا من $books معاجم، مضغوطة كلّها في ملف واحد داخل التطبيق. لا يرسل بياناتك، ويطلب إذن الإشعارات فقط إذا فعّلت كلمة اليوم.',
     'عربي – عربي قاموس چې بې انټرنټه کار کوي، پر $entries مدخلونو جوړ شوی چې له $books معاجمو راټول شوي او ټول په یوه فایل کې کمپرس شوي دي. هېڅ شی نه لېږي او هېڅ اجازه نه غواړي.',
     'فرهنگ عربی – عربی که بدون اینترنت کار می‌کند، بر پایهٔ $entries مدخل از $books فرهنگ، همه فشرده در یک فایل درون برنامه. چیزی نمی‌فرستد و اجازه‌ای نمی‌خواهد.',
-    'An Arabic–Arabic dictionary that works with no network at all, built from $entries entries across $books lexicons, packed into a single file inside the app. It sends nothing and asks for no permissions.',
+    'An Arabic–Arabic dictionary that works with no network at all, built from $entries entries across $books lexicons, packed into a single file inside the app. It sends no personal data and asks for notification permission only if you enable the daily word.',
   );
 
   String get aboutDeveloperBody => _pick(
@@ -589,16 +589,16 @@ class Strings {
 
   // ---------------------------------------------------------------- entry
   String get copySense => _pick(
-    'نسخ هذا القاموس',
+    'نسخ هذا الشرح',
     'دا شرح کاپي کړئ',
     'رونوشت این شرح',
     'Copy this definition',
   );
   String get senseCopied => _pick(
-    'نُسخ القاموس مع اسم معجمه',
+    'نُسخ الشرح مع اسم المعجم',
     'شرح د خپل معجم له نامه سره کاپي شو',
     'شرح همراه نام فرهنگش رونوشت شد',
-    'Definition copied, with its lexicon',
+    'Definition copied with the lexicon name',
   );
 
   // --------------------------------------------------------------- shell
@@ -629,7 +629,7 @@ class Strings {
     'برای به‌کار بردن این فرهنگ لازم نیست چیزی از رایانه بدانید. در هر بخش '
         'اینجا دکمه را همان‌گونه که در برنامه است می‌بینید، زیر آن کاری که '
         'می‌کند، و نمونه‌ای که خودتان بیازمایید.',
-    'You need to know nothing about computers to use this dictionary. In every '
+    'You do not need any computer experience to use this dictionary. In every '
         'section here you see the button exactly as it appears in the app, what '
         'it does underneath, and an example to try yourself.',
   );
@@ -660,7 +660,7 @@ class Strings {
         'نشانتان می‌دهد — پس از آن نیازی به فشردن چیزی نیست. اِعراب هم مهم '
         'نیست: «شي» بنویسید، «شَيْء» می‌یابید؛ «ذيب» بنویسید، «ذِئْب».',
     'Type the word here, letter by letter. With every letter the dictionary '
-        'shows you what it has found — you need press nothing afterwards. Nor do '
+        'shows you what it has found — you do not need to press a button afterwards. Nor do '
         'the marks matter: type "شي" and you find "شَيْء"; type "ذيب" and you '
         'find "ذِئْب".',
   );
@@ -679,10 +679,10 @@ class Strings {
         'house, and out comes everyone whose name begins that way.',
   );
   String get guideStartsExample => _pick(
-    'اكتب «رحم» — يأتيك رَحيم ورَحْمة ورَحِم ومَرْحَمة.',
+    'اكتب «رحم» — يأتيك رَحْمة ورَحِم.',
     '«رحم» ولیکئ — رَحيم، رَحْمة، رَحِم او مَرْحَمة راځي.',
     '«رحم» بنویسید — رَحيم، رَحْمة، رَحِم و مَرْحَمة می‌آید.',
-    'Type "رحم" — you get رَحيم, رَحْمة, رَحِم and مَرْحَمة.',
+    'Type "رحم" — you get رَحْمة and رَحِم.',
   );
 
   String get guideEndsBody => _pick(
@@ -719,10 +719,10 @@ class Strings {
         'not knowing whether it sits at the start or the end.',
   );
   String get guideContainsExample => _pick(
-    'اكتب «سلم» — يأتيك مُسْلِم وتَسْليم واسْتِسْلام.',
+    'اكتب «سلم» — يأتيك مُسْلِم وأَسْلَم.',
     '«سلم» ولیکئ — مُسْلِم، تَسْليم او اسْتِسْلام راځي.',
     '«سلم» بنویسید — مُسْلِم، تَسْليم و اسْتِسْلام می‌آید.',
-    'Type "سلم" — you get مُسْلِم, تَسْليم and اسْتِسْلام.',
+    'Type "سلم" — you get مُسْلِم and أَسْلَم.',
   );
 
   String get guideExactBody => _pick(
@@ -739,18 +739,18 @@ class Strings {
     'اكتب «قلب» — يأتيك قَلْب وحده، لا انْقِلاب ولا تَقَلُّب.',
     '«قلب» ولیکئ — یوازې قَلْب راځي، نه انْقِلاب او نه تَقَلُّب.',
     '«قلب» بنویسید — تنها قَلْب می‌آید، نه انْقِلاب و نه تَقَلُّب.',
-    'Type "قلب" — you get قَلْب alone, not انْقِلاب nor تَقَلُّب.',
+    'Type "قلب" — you get قَلْب alone, neither انْقِلاب nor تَقَلُّب.',
   );
 
   String get guideRootBody => _pick(
-    'كل كلمة عربية لها أصل من ثلاثة حروف، ومنه تتفرّع أسرة كاملة. '
+    'لكثير من الكلمات العربية جذر من ثلاثة أحرف أو أربعة، تتفرّع منه كلمات أخرى. '
         'هذا الباب يجمع لك الأسرة كلّها من أصلها الواحد.',
     'هره عربي کلمه یو درې‌حرفي اصل لري او له همدې څخه یوه بشپړه کورنۍ '
         'راټوکیږي. دا دروازه ټوله کورنۍ له یوه اصله راټولوي.',
     'هر واژهٔ عربی ریشه‌ای سه‌حرفی دارد و از آن خانواده‌ای کامل می‌روید. '
         'این در، همهٔ خانواده را از یک ریشه گرد می‌آورد.',
-    'Every Arabic word has a three-letter root, and from it a whole family '
-        'grows. This door gathers the family from its one origin.',
+    'Many Arabic words share a root of three or four letters. A family of words '
+        'grows from that root. This search brings them together.',
   );
   String get guideRootExample => _pick(
     'اكتب «كتب» — يأتيك كاتِب ومَكْتوب وكِتاب ومَكْتَبة ومُكاتَبة.',
@@ -761,7 +761,7 @@ class Strings {
 
   String get guideBooksBody => _pick(
     'هذا المعجم ستّة معاجم في واحد. بهذا الزرّ تقول له: خذني إلى معجم بعينه، '
-        'أو افتح لي الستّة جميعًا. وإذا غاب عنك قاموسٌ تنتظره، فانظر هنا أوّلًا — '
+        'أو افتح لي الستّة جميعًا. وإذا غاب عنك شرحٌ تنتظره، فانظر هنا أوّلًا — '
         'لعلّ معجمه مطفأ.',
     'دا قاموس په یوه کې شپږ معاجم دي. په دې تڼۍ ورته وایاست: یوه معین معجم '
         'ته مې بوځه، یا ټول شپږ راته خلاص کړه. که کوم شرح چې تمه یې لرئ ونه '
@@ -793,7 +793,7 @@ class Strings {
         'because it reads a whole book for you — so give it a moment.',
   );
   String get guideDeepExample => _pick(
-    'اكتب «الأسد» — تأتيك كل كلمة ذُكر الأسد في قاموسها، ولو لم تكن هي «أسد».',
+    'اكتب «الأسد» — تأتيك كل كلمة ذُكر الأسد في شرحها، ولو لم تكن هي «أسد».',
     '«الأسد» ولیکئ — هره کلمه راځي چې زمری یې په شرح کې یاد شوی، که څه هم '
         'پخپله «أسد» نه وي.',
     '«الأسد» بنویسید — هر واژه‌ای می‌آید که شیر در شرحش یاد شده، هرچند خودش '
@@ -803,8 +803,8 @@ class Strings {
   );
 
   String get guideEntryBody => _pick(
-    'حين تلمس كلمة تُفتح لك صفحتها. القواميس فيها مرقّمة: ١، ٢، ٣ — '
-        'فتعرف كم قاموسًا لهذه الكلمة، وأين أنت منها. وفوق كل مجموعة اسمُ '
+    'حين تلمس كلمة تُفتح لك صفحتها. الشروح فيها مرقّمة: ١، ٢، ٣ — '
+        'فتعرف كم شرحًا لهذه الكلمة، وأين أنت منها. وفوق كل مجموعة اسمُ '
         'المعجم الذي جاءت منه، ملوّنًا بلونه.',
     'کله چې یوه کلمه ولمسئ، پاڼه یې پرانیستل کیږي. شرحې پکې شمېرل شوې دي: '
         '۱، ۲، ۳ — نو پوهیږئ چې دې کلمې څو شرحې لري او تاسو په کومې کې یاست. '
@@ -819,7 +819,7 @@ class Strings {
   );
 
   String get guideCopyBody => _pick(
-    'بجانب كل قاموسٍ زرٌّ صغير للنسخ. تضغطه فيُؤخذ القاموس كلّه — نصّه والكلمة '
+    'بجانب كل شرحٍ زرٌّ صغير للنسخ. تضغطه فيُنسخ الشرح كلّه — نصّه والكلمة '
         'واسم معجمه — إلى الحافظة، فتلصقه في رسالة أو دفتر أو بحث. '
         'وفي أعلى الصفحة زرٌّ ينسخ المدخل بأكمله دفعةً واحدة.',
     'د هرې شرحې څنګ ته یوه کوچنۍ د کاپي تڼۍ ده. کېکاږئ یې، نو ټوله شرح — '
@@ -901,41 +901,45 @@ class Strings {
   String get dailyWord =>
       _pick('كلمة اليوم', 'د ورځې کلمه', 'واژهٔ روز', 'Word of the day');
   String get dailyWordDetail => _pick(
-    'كلمة واحدة من المعجم، تصلك كل يوم',
+    'كلمة يومية بحسب التوقيت المحلي لجهازك؛ قد يتأخر وصولها لتوفير البطارية',
     'له قاموسه یوه کلمه، هره ورځ درځي',
     'یک واژه از فرهنگ، هر روز به شما می‌رسد',
-    'One word from the lexicon, delivered every day',
+    'A daily word in your device’s local time; battery saving may delay delivery',
   );
   String get dailyWordAsk => _pick(
-    'أتأذن لنا أن نوقظك بكلمة؟',
+    'هل تودّ تلقّي كلمة كل يوم؟',
     'اجازه راکوئ چې په یوه کلمه مو راویښ کړو؟',
     'اجازه می‌دهید با واژه‌ای بیدارتان کنیم؟',
-    'May we wake you with a word?',
+    'Would you like a word each day?',
   );
   String get dailyWordAskDetail => _pick(
-    'كل صباح كلمة واحدة من المعاجم الستّة، بمعناها. لا شيء غيرها — '
-        'ولا إعلان، ولا اتصال بالإنترنت.',
+    'كل يوم كلمة واحدة من المعاجم الستّة، بمعناها، في الوقت الذي تختاره. '
+        'بلا إعلانات أو اتصال بالإنترنت.',
     'هر سهار له شپږو معاجمو یوه کلمه، له خپلې شرحې سره. بل هېڅ نه — '
         'نه اعلان، نه له انټرنټ سره اړیکه.',
     'هر بامداد یک واژه از شش فرهنگ، با شرحش. جز این هیچ — '
         'نه آگهی، نه اتصال به اینترنت.',
-    'One word each morning from the six lexicons, with its meaning. Nothing '
-        'else — no advertising, and no connection to the internet.',
+    'One word each day from the six lexicons, with its meaning, at your chosen '
+        'time. No advertising or internet connection.',
   );
   String get allowNotifications => _pick(
-    'نعم، أيقظني',
+    'السماح بالإشعارات',
     'هو، راویښ مې کړئ',
     'بله، بیدارم کنید',
-    'Yes, wake me',
+    'Allow notifications',
   );
   String get notNow => _pick('ليس الآن', 'اوس نه', 'اکنون نه', 'Not now');
-  String get notificationTime =>
-      _pick('وقت الوصول', 'د رارسېدو وخت', 'زمان رسیدن', 'Delivery time');
+  String get notificationTime => _pick(
+    'الوقت المحلي (٢٤ ساعة)',
+    'د رارسېدو وخت',
+    'زمان رسیدن',
+    'Local time (24-hour)',
+  );
   String get notificationsBlocked => _pick(
-    'الإشعارات موقوفة من إعدادات النظام',
+    'فعّل الإشعارات من إعدادات النظام، ثم عد وفعّل كلمة اليوم',
     'نایټوفیکشن د سیستم له تنظیماتو بند دی',
     'اعلان‌ها از تنظیمات سیستم بسته است',
-    'Notifications are switched off in the system settings',
+    'Allow notifications in system settings, then return and enable the daily word',
   );
   String get notificationsUnavailable => _pick(
     'لا تدعم هذه المنصّة الإشعارات',
@@ -1033,7 +1037,7 @@ class Strings {
         'نمی‌رود. پاک کردن برنامه آن را نیز پاک می‌کند.',
     'The words you save, what you have read, the interface language and theme, '
         'and the time of the daily word — all of it is stored on your device '
-        'alone and never leaves it. Uninstalling the app erases it with them.',
+        'alone and never leaves it. Uninstalling the app erases this data.',
   );
   String get privacyHeading3 =>
       _pick('الأذونات', 'اجازې', 'اجازه‌ها', 'Permissions');
@@ -1275,7 +1279,7 @@ class Strings {
   );
 
   String senses(int count) => _pick(
-    _arabicCount(count, 'قاموس واحد', 'قاموسان', 'قواميس', 'قاموسًا'),
+    _arabicCount(count, 'شرح واحد', 'شرحان', 'شروح', 'شرحًا'),
     '${n(count)} شرحې',
     '${n(count)} شرح',
     count == 1 ? '1 sense' : '${n(count)} senses',
@@ -1307,7 +1311,7 @@ class Strings {
   String get lexiconsLabel => _pick('معجمًا', 'معاجم', 'فرهنگ', 'lexicons');
 
   String hiddenSenses(int count) => _pick(
-    '${senses(count)} مخفيّة بسبب تصفية المعاجم',
+    'عدد الشروح المخفيّة بسبب تصفية المعاجم: ${n(count)}',
     'د معاجمو د فلټر له امله ${n(count)} شرحې پټې دي',
     'به سبب پالایش فرهنگ‌ها ${n(count)} شرح پنهان است',
     '${senses(count)} hidden by the lexicon filter',
